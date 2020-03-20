@@ -1,0 +1,91 @@
+{
+  "ID": "c68ca7c8-c9b6-4ded-b25a-2867f10a150a",
+  "Name": "Covid19",
+  "Base": [
+    {
+      "Name": ".DS_Store",
+      "Content": "Base/.DS_Store"
+    },
+    {
+      "Name": "Base/covid19/data.py",
+      "Content": "Base/covid19/data.py"
+    }
+  ],
+  "Agents": [],
+  "Queries": [
+    {
+      "Name": "covid19.py",
+      "Content": "Queries/covid19.py",
+      "ID": "covid19.py"
+    }
+  ],
+  "Permissions": [
+    {
+      "ID": "root",
+      "Permission": 2
+    },
+    {
+      "ID": "Public",
+      "Permission": 0
+    }
+  ],
+  "NuGets": [],
+  "Pips": [
+    {
+      "ID": "matplotlib"
+    },
+    {
+      "ID": "pandas"
+    },
+    {
+      "ID": "gunicorn"
+    }
+  ],
+  "Jars": [],
+  "Bins": [],
+  "Files": [
+    {
+      "Name": ".DS_Store",
+      "Content": "Files/.DS_Store"
+    },
+    {
+      "Name": "my.azureauth",
+      "Content": "Files/my.azureauth"
+    },
+    {
+      "Name": "populations.csv",
+      "Content": "Files/populations.csv"
+    },
+    {
+      "Name": "assets/resizing.js",
+      "Content": "Files/assets/resizing.js"
+    },
+    {
+      "Name": "assets/covid19.css",
+      "Content": "Files/assets/covid19.css"
+    },
+    {
+      "Name": "assets/Acumin-BdPro.otf",
+      "Content": "Files/assets/Acumin-BdPro.otf"
+    },
+    {
+      "Name": "assets/base.css",
+      "Content": "Files/assets/base.css"
+    }
+  ],
+  "ReadMe": "README.md",
+  "Publisher": null,
+  "PublishTimestamp": "0001-01-01T00:00:00",
+  "AutoDeploy": true,
+  "Container": {
+    "Type": "",
+    "Request": {
+      "Cpu": "",
+      "Mem": ""
+    },
+    "Limit": {
+      "Cpu": "",
+      "Mem": ""
+    }
+  }
+}
