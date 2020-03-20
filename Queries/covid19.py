@@ -66,7 +66,6 @@ def run(port, path):
             # world_population_url = 'http://api.worldbank.org/v2/en/indicator/SP.POP.TOTL?downloadformat=csv'
             world_population_url = '/app/mnt/Files/populations.csv'
             world_population_pd = pd.read_csv(world_population_url)
-            # world_population_pd = world_population_pd.set_index(['Country'])
             print(world_population_pd)
 
             
@@ -245,15 +244,12 @@ def run(port, path):
                     # ranked_countries = cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World') & (cov19.all_date['date'] == last_date)] if country_name == 'World' else cov19.all_date[(cov19.all_date['Province/State'] == state_name) & (cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['date'] == last_date)]
                     ranked_countries = cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World') & (cov19.all_date['date'] == last_date)] if country_name == 'World' else cov19.all_date[(cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['date'] == last_date)]
                     ranked_countries = ranked_countries.sort_values(by=['confirmed', 'active'], ascending=False)
-                    print(ranked_countries)
                     df = ranked_countries[['Country/Region', 'confirmed', 'confirmed_change', 'active', 'active_change', 'death', 'death_change']].copy(deep=True) if country_name == 'World' else ranked_countries[['Province/State', 'confirmed', 'confirmed_change', 'active', 'active_change', 'death', 'death_change']].copy(deep=True) 
 
                     df[['confirmed', 'confirmed_change', 'active', 'active_change', 'death', 'death_change']] = df[['confirmed', 'confirmed_change', 'active', 'active_change', 'death', 'death_change']].apply(pd.to_numeric)
-
                     df['recovered'] = round(100 * (df['confirmed'] - df['active'] - df['death']) / df['confirmed'], 2)
                     
                     start_idx = 1
-                    # print(cov19.first_infection[start_idx][cov19.first_infection[start_idx]['Country/Region'] == country_name])
                     df['Days Infected'] = df['Country/Region'].apply(lambda x: (datetime.datetime.now() - cov19.first_infection[start_idx][(cov19.first_infection[start_idx]['Country/Region'] == x) & (cov19.first_infection[start_idx]['Province/State'] == 'All')]['infection'].iloc[0]).days) if country_name == 'World' else df['Province/State'].apply(lambda x: (datetime.datetime.now() - cov19.first_infection[start_idx][(cov19.first_infection[start_idx]['Province/State'] == x)]['infection'].iloc[0]).days)
 
                     df = df.rename(columns={'confirmed': 'Confirmed', 'confirmed_change': 'Confirmed Chg' , 'active': 'Active', 'active_change': 'Active Chg', 'death': 'Dead', 'death_change': 'Dead Chg', 'recovered': 'Recovered %'})
