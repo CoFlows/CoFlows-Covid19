@@ -31,7 +31,9 @@ import covid19.data as cov19
 def getData(country_name, state_name, type_name, cohort_name, day_count_value):
     cov19.Load()
 
-    last_date = cov19.all_date[(cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['Province/State'] == 'All')]['date'].max()
+    last_date = cov19.all_date[(cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['Province/State'] == state_name)]['date'].max()
+
+    print('-------' + str(last_date))
 
     if type_name == 'Statistics' and state_name == 'All':
         # ranked_countries = cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World') & (cov19.all_date['date'] == last_date)] if country_name == 'World' else cov19.all_date[(cov19.all_date['Province/State'] == state_name) & (cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['date'] == last_date)]
@@ -43,7 +45,7 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
         df['recovered'] = round(100 * (df['confirmed'] - df['active'] - df['death']) / df['confirmed'], 2)
         
         start_idx = 1
-        df['Days Infected'] = df['Country/Region'].apply(lambda x: (datetime.datetime.now() - cov19.first_infection[start_idx][(cov19.first_infection[start_idx]['Country/Region'] == x) & (cov19.first_infection[start_idx]['Province/State'] == 'All')]['infection'].iloc[0]).days) if country_name == 'World' else df['Province/State'].apply(lambda x: (datetime.datetime.now() - cov19.first_infection[start_idx][(cov19.first_infection[start_idx]['Province/State'] == x)]['infection'].iloc[0]).days)
+        df['Days Infected'] = df['Country/Region'].apply(lambda x: (datetime.datetime.now() - cov19.first_infection[start_idx][(cov19.first_infection[start_idx]['Country/Region'] == x) & (cov19.first_infection[start_idx]['Province/State'] == 'All')]['infection'].iloc[0]).days) if country_name == 'World' else df['Province/State'].apply(lambda x: (datetime.datetime.now() - cov19.first_infection[start_idx][((cov19.first_infection[start_idx]['Country/Region'] == country_name) & (cov19.first_infection[start_idx]['Province/State'] == x))]['infection'].iloc[0]).days)
 
         df = df.rename(columns={'confirmed': 'Confirmed', 'confirmed_change': 'Confirmed Chg' , 'active': 'Active', 'active_change': 'Active Chg', 'death': 'Dead', 'death_change': 'Dead Chg', 'recovered': 'Recovered %'})
         

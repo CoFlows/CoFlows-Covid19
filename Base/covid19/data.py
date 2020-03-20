@@ -219,7 +219,6 @@ def Load():
 
         print('Covid19 computing first recovered @ ' + datetime.datetime.now().strftime("%H:%M:%S") + ' ...')
 
-        
         for index, row in countries_provinces_pd.iterrows():
             country_region = str(row['Country/Region'])
             province_state = str(row['Province/State'])
@@ -237,15 +236,16 @@ def Load():
         union_change_0_death[start_idx] = _union_change_0_death
         union_change_0_recovered[start_idx] = _union_change_0_recovered
     
+        print('Covid19 computing done @ ' + datetime.datetime.now().strftime("%H:%M:%S") + ' ...')
 
-    print('------------------ Confirmed')
-    print(union_change_0_confirmed)
-    print('------------------ Active')
-    print(union_change_0_active)
-    print('------------------ Deaths')
-    print(union_change_0_death)
-    print('------------------ Recovered')
-    print(union_change_0_recovered)
+    # print('------------------ Confirmed')
+    # print(union_change_0_confirmed)
+    # print('------------------ Active')
+    # print(union_change_0_active)
+    # print('------------------ Deaths')
+    # print(union_change_0_death)
+    # print('------------------ Recovered')
+    # print(union_change_0_recovered)
 
     all_date = union_change
     all_from_0 = union_change_0
