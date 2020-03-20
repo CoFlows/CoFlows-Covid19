@@ -90,9 +90,6 @@ def getJson(country_name, state_name, type_name, cohort_name, _day_count_value):
     return df.T.to_dict().values()
     
 
-def test():
-    return getJson('World', 'All', 'Statistics', '', 1)
-
 dash_init = True
 __assetsFolder = '/app/mnt/Files/assets'
 
