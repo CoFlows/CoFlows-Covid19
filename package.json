@@ -3,10 +3,6 @@
   "Name": "Covid19",
   "Base": [
     {
-      "Name": ".DS_Store",
-      "Content": "Base/.DS_Store"
-    },
-    {
       "Name": "Base/covid19/data.py",
       "Content": "Base/covid19/data.py"
     }
@@ -22,6 +18,10 @@
   "Permissions": [
     {
       "ID": "root",
+      "Permission": 2
+    },
+    {
+      "ID": "arturo.rodriguez@aqicapital.com",
       "Permission": 2
     },
     {
@@ -44,10 +44,6 @@
   "Jars": [],
   "Bins": [],
   "Files": [
-    {
-      "Name": ".DS_Store",
-      "Content": "Files/.DS_Store"
-    },
     {
       "Name": "my.azureauth",
       "Content": "Files/my.azureauth"
