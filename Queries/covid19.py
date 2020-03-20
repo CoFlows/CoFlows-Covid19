@@ -28,6 +28,70 @@ import covid19.data as cov19
 
 # pd.set_option('display.max_columns', 500)
 
+def getData(country_name, state_name, type_name, cohort_name, day_count_value):
+    cov19.Load()
+
+    last_date = cov19.all_date[(cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['Province/State'] == 'All')]['date'].max()
+
+    if type_name == 'Statistics' and state_name == 'All':
+        # ranked_countries = cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World') & (cov19.all_date['date'] == last_date)] if country_name == 'World' else cov19.all_date[(cov19.all_date['Province/State'] == state_name) & (cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['date'] == last_date)]
+        ranked_countries = cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World') & (cov19.all_date['date'] == last_date)] if country_name == 'World' else cov19.all_date[(cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['date'] == last_date)]
+        ranked_countries = ranked_countries.sort_values(by=['confirmed', 'active'], ascending=False)
+        df = ranked_countries[['Country/Region', 'confirmed', 'confirmed_change', 'active', 'active_change', 'death', 'death_change']].copy(deep=True) if country_name == 'World' else ranked_countries[['Province/State', 'confirmed', 'confirmed_change', 'active', 'active_change', 'death', 'death_change']].copy(deep=True) 
+
+        df[['confirmed', 'confirmed_change', 'active', 'active_change', 'death', 'death_change']] = df[['confirmed', 'confirmed_change', 'active', 'active_change', 'death', 'death_change']].apply(pd.to_numeric)
+        df['recovered'] = round(100 * (df['confirmed'] - df['active'] - df['death']) / df['confirmed'], 2)
+        
+        start_idx = 1
+        df['Days Infected'] = df['Country/Region'].apply(lambda x: (datetime.datetime.now() - cov19.first_infection[start_idx][(cov19.first_infection[start_idx]['Country/Region'] == x) & (cov19.first_infection[start_idx]['Province/State'] == 'All')]['infection'].iloc[0]).days) if country_name == 'World' else df['Province/State'].apply(lambda x: (datetime.datetime.now() - cov19.first_infection[start_idx][(cov19.first_infection[start_idx]['Province/State'] == x)]['infection'].iloc[0]).days)
+
+        df = df.rename(columns={'confirmed': 'Confirmed', 'confirmed_change': 'Confirmed Chg' , 'active': 'Active', 'active_change': 'Active Chg', 'death': 'Dead', 'death_change': 'Dead Chg', 'recovered': 'Recovered %'})
+        
+        return df
+                    
+    elif type_name == 'Day count':
+        df = cov19.all_from_0_confirmed[day_count_value]
+        if cohort_name == 'Active':
+            df = cov19.all_from_0_active[day_count_value]
+        if cohort_name == 'Dead':
+            df = cov19.all_from_0_death[day_count_value]
+            
+        
+        df = df[[col for col in df.columns if '/' not in col]]
+
+        ranked_countries = cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World') & (cov19.all_date['date'] == last_date)]
+        if cohort_name == 'Confirmed':
+            ranked_countries = ranked_countries.sort_values(by=['confirmed'], ascending=False)
+            ranked_countries = ranked_countries[ranked_countries['confirmed'] > day_count_value]
+        if cohort_name == 'Active':
+            ranked_countries = ranked_countries.sort_values(by=['active'], ascending=False)
+            ranked_countries = ranked_countries[ranked_countries['active'] > day_count_value]
+        if cohort_name == 'Dead':
+            ranked_countries = ranked_countries.sort_values(by=['death'], ascending=False)
+            ranked_countries = ranked_countries[ranked_countries['death'] > day_count_value]
+
+        df = df[ranked_countries['Country/Region']]
+        df = df.reset_index()
+        df['Day Count'] = df['Day Count'].apply(lambda x: str(x.days) + ' days')
+
+        return df
+
+    else:
+        df = cov19.all_date[(cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['Province/State'] == state_name)]
+        df = df[['date', 'confirmed', 'confirmed_change', 'active', 'recovered', 'death']]
+
+        return df
+
+def getJson(country_name, state_name, type_name, cohort_name, _day_count_value):
+
+    day_count_value = int(_day_count_value)
+    df = getData(country_name, state_name, type_name, cohort_name, day_count_value)
+    df = df.applymap(lambda x: str(x) if isinstance(x, datetime.datetime) else str(x))
+    return df.T.to_dict().values()
+    
+
+def test():
+    return getJson('World', 'All', 'Statistics', '', 1)
 
 dash_init = True
 __assetsFolder = '/app/mnt/Files/assets'
@@ -90,6 +154,7 @@ def run(port, path):
                         id='title_div',
                         children= [
                             html.H3(id='title', children='Covid 19'),
+                            html.Div(id='link_id', children=[ html.A('Download JSON Dataset', href='http://localhost/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getJson&p[0]=World&p[1]=All&p[2]=Statistics&p[3]=_&p[4]=1', target="_blank") ])
                         ],
                     ),
 
@@ -229,7 +294,10 @@ def run(port, path):
                 
 
             @app.callback(
-                Output('table_div', 'children'),
+                [
+                    Output('table_div', 'children'),
+                    Output('link_id', 'children')
+                ],
                 [
                     Input('countries', 'value'),
                     Input('states', 'value'),
@@ -240,24 +308,10 @@ def run(port, path):
             )
             def set_table(country_name, state_name, type_name, cohort_name, day_count_value):
 
-                if type_name == 'Statistics' and state_name == 'All':
-                    # ranked_countries = cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World') & (cov19.all_date['date'] == last_date)] if country_name == 'World' else cov19.all_date[(cov19.all_date['Province/State'] == state_name) & (cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['date'] == last_date)]
-                    ranked_countries = cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World') & (cov19.all_date['date'] == last_date)] if country_name == 'World' else cov19.all_date[(cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['date'] == last_date)]
-                    ranked_countries = ranked_countries.sort_values(by=['confirmed', 'active'], ascending=False)
-                    df = ranked_countries[['Country/Region', 'confirmed', 'confirmed_change', 'active', 'active_change', 'death', 'death_change']].copy(deep=True) if country_name == 'World' else ranked_countries[['Province/State', 'confirmed', 'confirmed_change', 'active', 'active_change', 'death', 'death_change']].copy(deep=True) 
+                link = html.A('Download JSON Dataset', href='http://localhost/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getJson&p[0]=' + country_name + '&p[1]=' + state_name + '&p[2]=' + type_name + '&p[3]=' + cohort_name + '&p[4]=' + str(day_count_value), target="_blank")
 
-                    df[['confirmed', 'confirmed_change', 'active', 'active_change', 'death', 'death_change']] = df[['confirmed', 'confirmed_change', 'active', 'active_change', 'death', 'death_change']].apply(pd.to_numeric)
-                    df['recovered'] = round(100 * (df['confirmed'] - df['active'] - df['death']) / df['confirmed'], 2)
-                    
-                    start_idx = 1
-                    df['Days Infected'] = df['Country/Region'].apply(lambda x: (datetime.datetime.now() - cov19.first_infection[start_idx][(cov19.first_infection[start_idx]['Country/Region'] == x) & (cov19.first_infection[start_idx]['Province/State'] == 'All')]['infection'].iloc[0]).days) if country_name == 'World' else df['Province/State'].apply(lambda x: (datetime.datetime.now() - cov19.first_infection[start_idx][(cov19.first_infection[start_idx]['Province/State'] == x)]['infection'].iloc[0]).days)
-
-                    df = df.rename(columns={'confirmed': 'Confirmed', 'confirmed_change': 'Confirmed Chg' , 'active': 'Active', 'active_change': 'Active Chg', 'death': 'Dead', 'death_change': 'Dead Chg', 'recovered': 'Recovered %'})
-                    
-
-
-                    
-                    return html.Div(
+                df = getData(country_name, state_name, type_name, cohort_name, day_count_value)
+                return html.Div(
                                     dash_table.DataTable(
                                         id='table',
                                         columns=[{"name": i, "id": i} for i in df.columns],
@@ -265,51 +319,78 @@ def run(port, path):
                                         sort_mode="single",
                                         data=df.to_dict('records'),
                                     )
-                                )
-                elif type_name == 'Day count':
-                    df = cov19.all_from_0_confirmed[day_count_value]
-                    if cohort_name == 'Active':
-                        df = cov19.all_from_0_active[day_count_value]
-                    if cohort_name == 'Dead':
-                        df = cov19.all_from_0_death[day_count_value]
+                                ), link
+
+                # if type_name == 'Statistics' and state_name == 'All':
+                #     # ranked_countries = cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World') & (cov19.all_date['date'] == last_date)] if country_name == 'World' else cov19.all_date[(cov19.all_date['Province/State'] == state_name) & (cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['date'] == last_date)]
+                #     ranked_countries = cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World') & (cov19.all_date['date'] == last_date)] if country_name == 'World' else cov19.all_date[(cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['date'] == last_date)]
+                #     ranked_countries = ranked_countries.sort_values(by=['confirmed', 'active'], ascending=False)
+                #     df = ranked_countries[['Country/Region', 'confirmed', 'confirmed_change', 'active', 'active_change', 'death', 'death_change']].copy(deep=True) if country_name == 'World' else ranked_countries[['Province/State', 'confirmed', 'confirmed_change', 'active', 'active_change', 'death', 'death_change']].copy(deep=True) 
+
+                #     df[['confirmed', 'confirmed_change', 'active', 'active_change', 'death', 'death_change']] = df[['confirmed', 'confirmed_change', 'active', 'active_change', 'death', 'death_change']].apply(pd.to_numeric)
+                #     df['recovered'] = round(100 * (df['confirmed'] - df['active'] - df['death']) / df['confirmed'], 2)
+                    
+                #     start_idx = 1
+                #     df['Days Infected'] = df['Country/Region'].apply(lambda x: (datetime.datetime.now() - cov19.first_infection[start_idx][(cov19.first_infection[start_idx]['Country/Region'] == x) & (cov19.first_infection[start_idx]['Province/State'] == 'All')]['infection'].iloc[0]).days) if country_name == 'World' else df['Province/State'].apply(lambda x: (datetime.datetime.now() - cov19.first_infection[start_idx][(cov19.first_infection[start_idx]['Province/State'] == x)]['infection'].iloc[0]).days)
+
+                #     df = df.rename(columns={'confirmed': 'Confirmed', 'confirmed_change': 'Confirmed Chg' , 'active': 'Active', 'active_change': 'Active Chg', 'death': 'Dead', 'death_change': 'Dead Chg', 'recovered': 'Recovered %'})
+                    
+
+
+                    
+                #     return html.Div(
+                #                     dash_table.DataTable(
+                #                         id='table',
+                #                         columns=[{"name": i, "id": i} for i in df.columns],
+                #                         sort_action="native",
+                #                         sort_mode="single",
+                #                         data=df.to_dict('records'),
+                #                     )
+                #                 )
+                # elif type_name == 'Day count':
+                #     df = cov19.all_from_0_confirmed[day_count_value]
+                #     if cohort_name == 'Active':
+                #         df = cov19.all_from_0_active[day_count_value]
+                #     if cohort_name == 'Dead':
+                #         df = cov19.all_from_0_death[day_count_value]
                         
                     
-                    df = df[[col for col in df.columns if '/' not in col]]
+                #     df = df[[col for col in df.columns if '/' not in col]]
 
-                    ranked_countries = cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World') & (cov19.all_date['date'] == last_date)]
-                    if cohort_name == 'Confirmed':
-                        ranked_countries = ranked_countries.sort_values(by=['confirmed'], ascending=False)
-                        ranked_countries = ranked_countries[ranked_countries['confirmed'] > day_count_value]
-                    if cohort_name == 'Active':
-                        ranked_countries = ranked_countries.sort_values(by=['active'], ascending=False)
-                        ranked_countries = ranked_countries[ranked_countries['active'] > day_count_value]
-                    if cohort_name == 'Dead':
-                        ranked_countries = ranked_countries.sort_values(by=['death'], ascending=False)
-                        ranked_countries = ranked_countries[ranked_countries['death'] > day_count_value]
+                #     ranked_countries = cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World') & (cov19.all_date['date'] == last_date)]
+                #     if cohort_name == 'Confirmed':
+                #         ranked_countries = ranked_countries.sort_values(by=['confirmed'], ascending=False)
+                #         ranked_countries = ranked_countries[ranked_countries['confirmed'] > day_count_value]
+                #     if cohort_name == 'Active':
+                #         ranked_countries = ranked_countries.sort_values(by=['active'], ascending=False)
+                #         ranked_countries = ranked_countries[ranked_countries['active'] > day_count_value]
+                #     if cohort_name == 'Dead':
+                #         ranked_countries = ranked_countries.sort_values(by=['death'], ascending=False)
+                #         ranked_countries = ranked_countries[ranked_countries['death'] > day_count_value]
 
-                    df = df[ranked_countries['Country/Region']]
-                    df = df.reset_index()
-                    df['Day Count'] = df['Day Count'].apply(lambda x: str(x.days) + ' days')
+                #     df = df[ranked_countries['Country/Region']]
+                #     df = df.reset_index()
+                #     df['Day Count'] = df['Day Count'].apply(lambda x: str(x.days) + ' days')
 
-                    return html.Div(
-                                    dash_table.DataTable(
-                                        id='table',
-                                        columns=[{"name": i, "id": i} for i in df.columns],
-                                        data=df.to_dict('records'),
-                                    )
-                                )
+                #     return html.Div(
+                #                     dash_table.DataTable(
+                #                         id='table',
+                #                         columns=[{"name": i, "id": i} for i in df.columns],
+                #                         data=df.to_dict('records'),
+                #                     )
+                #                 )
 
-                else:
-                    df = cov19.all_date[(cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['Province/State'] == state_name)]
-                    df = df[['date', 'confirmed', 'confirmed_change', 'active', 'recovered', 'death']]
+                # else:
+                #     df = cov19.all_date[(cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['Province/State'] == state_name)]
+                #     df = df[['date', 'confirmed', 'confirmed_change', 'active', 'recovered', 'death']]
                     
-                    return html.Div(
-                                    dash_table.DataTable(
-                                        id='table',
-                                        columns=[{"name": i, "id": i} for i in df.columns],
-                                        data=df.to_dict('records'),
-                                    )
-                                )
+                #     return html.Div(
+                #                     dash_table.DataTable(
+                #                         id='table',
+                #                         columns=[{"name": i, "id": i} for i in df.columns],
+                #                         data=df.to_dict('records'),
+                #                     )
+                #                 )
 
 
             # necessary to shutdown server incase the code change

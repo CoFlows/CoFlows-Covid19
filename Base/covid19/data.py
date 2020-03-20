@@ -18,8 +18,6 @@ first_dates = {}
 __lock_loading = threading.Lock()
 
 def Load():
-    print('Covid19 Loading data starting @ ' + datetime.datetime.now().strftime("%H:%M:%S") + ' ...')
-
     __lock_loading.acquire()
 
     global all_date, all_from_0, all_from_0_confirmed, all_from_0_active, all_from_0_death, all_from_0_recovered, first_infection, first_death, first_recovered, first_dates
@@ -27,6 +25,9 @@ def Load():
     if all_date is not None:
         __lock_loading.release()
         return
+
+    print('Covid19 Loading data starting @ ' + datetime.datetime.now().strftime("%H:%M:%S") + ' ...')
+
 
     covid19_confirmed_url = 'https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv'
     covid19_death_url = 'https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv'
