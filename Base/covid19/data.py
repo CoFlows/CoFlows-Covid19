@@ -238,15 +238,6 @@ def Load():
     
         print('Covid19 computing done @ ' + datetime.datetime.now().strftime("%H:%M:%S") + ' ...')
 
-    # print('------------------ Confirmed')
-    # print(union_change_0_confirmed)
-    # print('------------------ Active')
-    # print(union_change_0_active)
-    # print('------------------ Deaths')
-    # print(union_change_0_death)
-    # print('------------------ Recovered')
-    # print(union_change_0_recovered)
-
     all_date = union_change
     all_from_0 = union_change_0
     all_from_0_confirmed = union_change_0_confirmed

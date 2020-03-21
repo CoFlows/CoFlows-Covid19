@@ -33,8 +33,6 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
 
     last_date = cov19.all_date[(cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['Province/State'] == state_name)]['date'].max()
 
-    print('-------' + str(last_date))
-
     if type_name == 'Statistics' and state_name == 'All':
         # ranked_countries = cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World') & (cov19.all_date['date'] == last_date)] if country_name == 'World' else cov19.all_date[(cov19.all_date['Province/State'] == state_name) & (cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['date'] == last_date)]
         ranked_countries = cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World') & (cov19.all_date['date'] == last_date)] if country_name == 'World' else cov19.all_date[(cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['date'] == last_date)]
@@ -90,7 +88,32 @@ def getJson(country_name, state_name, type_name, cohort_name, _day_count_value):
     df = getData(country_name, state_name, type_name, cohort_name, day_count_value)
     df = df.applymap(lambda x: str(x) if isinstance(x, datetime.datetime) else str(x))
     return df.T.to_dict().values()
+
+def getAllData():
+    cov19.Load()
+    df = cov19.all_date
+    df = df.applymap(lambda x: str(x) if isinstance(x, datetime.datetime) else str(x))
+    df = df[['date', 'Country/Region', 'Province/State', 'confirmed', 'confirmed_change', 'active', 'active_change', 'recovered', 'recovered_change', 'death', 'death_change']]
+    return df.T.to_dict().values()
+
+
+def getAllDataFromX():
+    cov19.Load()
+    df_0 = cov19.all_from_0
+
+    df = pd.DataFrame()
+
+    for key in df_0:
+        _df = df_0[key].copy(deep=True)
+        _df['Day Count'] = _df['Day Count'].apply(lambda x: str(x.days) + ' days')
+        _df['testIndex'] = _df['Country/Region'] + _df['Province/State'] + _df['Day Count'].apply(lambda x: str(x)) + str(key)
+        _df['Start'] = key
+        _df = _df.set_index(['testIndex'])
+        df = df.append(_df)
     
+    df = df.applymap(lambda x: str(x) if isinstance(x, datetime.datetime) else str(x))
+    return df.T.to_dict().values()
+
 
 dash_init = True
 __assetsFolder = '/app/mnt/Files/assets'
@@ -152,8 +175,11 @@ def run(port, path):
                     html.Div(
                         id='title_div',
                         children= [
-                            html.H3(id='title', children='Covid 19'),
-                            html.Div(id='link_id', children=[ html.A('Download JSON Dataset', href='http://coflows.quant.app/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getJson&p[0]=World&p[1]=All&p[2]=Statistics&p[3]=_&p[4]=1', target="_blank") ])
+                            html.H3(id='title', children='Covid 19 @ ' + last_date.strftime("%Y-%m-%d")),
+                            html.Div(id='link_id', children=[ 
+                                
+                            ]),
+                            # html.Div( ])
                         ],
                     ),
 
@@ -307,7 +333,13 @@ def run(port, path):
             )
             def set_table(country_name, state_name, type_name, cohort_name, day_count_value):
 
-                link = html.A('Download JSON Dataset', href='http://coflows.quant.app/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getJson&p[0]=' + country_name + '&p[1]=' + state_name + '&p[2]=' + type_name + '&p[3]=' + cohort_name + '&p[4]=' + str(day_count_value), target="_blank")
+                link = [
+                    html.A('Download JSON Dataset in table below', href='http://coflows.quant.app/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getJson&p[0]=' + country_name + '&p[1]=' + state_name + '&p[2]=' + type_name + '&p[3]=' + cohort_name + '&p[4]=' + str(day_count_value), target="_blank"),
+                    html.Br(),
+                    html.A('Download JSON All Timeseries', href='http://coflows.quant.app/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getAllData', target="_blank"),
+                    html.Br(),
+                    html.A('Download JSON All Timeseries From X', href='http://coflows.quant.app/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getAllDataFromX', target="_blank")
+                ]
 
                 df = getData(country_name, state_name, type_name, cohort_name, day_count_value)
                 return html.Div(
