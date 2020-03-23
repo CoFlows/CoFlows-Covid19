@@ -39,6 +39,9 @@
     },
     {
       "ID": "gunicorn"
+    },
+    {
+      "ID": "scipy"
     }
   ],
   "Jars": [],
