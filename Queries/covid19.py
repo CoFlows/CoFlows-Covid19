@@ -68,6 +68,8 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
                 n = len(confirmed_data) - 1
                 if n > 2:
                     return round(confirmed_data.iloc[n] * confirmed_data.iloc[n] / confirmed_data.iloc[n - 1], 0)
+                elif n == -1:
+                    return 0
                 else:
                     return confirmed_data.iloc[n]
 
