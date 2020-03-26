@@ -27,7 +27,6 @@ def Load():
     __lock_loading.acquire()
 
     global all_date, all_from_0, all_from_0_confirmed, all_from_0_growth, all_from_0_active, all_from_0_death, all_from_0_recovered, first_infection, first_death, first_recovered, first_dates
-    # global all_date, all_from_0, all_from_0_confirmed, all_from_0_growth, all_from_0_death, first_infection, first_death, first_dates
 
     if all_date is not None:
         __lock_loading.release()
@@ -38,15 +37,14 @@ def Load():
     jhu_covid19_confirmed_url = 'https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv'
     jhu_covid19_death_url = 'https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv'
 
-    ulklc_url = 'https://raw.githubusercontent.com/ulklc/covid19-timeseries/master/countryReport/raw/rawReport.csv'
-
     covid19_confirmed_pd = pd.read_csv(jhu_covid19_confirmed_url)
     covid19_death_pd = pd.read_csv(jhu_covid19_death_url)
+
+    ulklc_url = 'https://raw.githubusercontent.com/ulklc/covid19-timeseries/master/countryReport/raw/rawReport.csv'
     ulklc_pd = pd.read_csv(ulklc_url)
     ulklc_pd = ulklc_pd.rename(columns={'day': 'date', 'countryName': 'Country/Region', 'region': 'Continent', 'lat': 'Lat', 'lon': 'Long'})
     ulklc_pd[['date']] = ulklc_pd[['date']].apply(pd.to_datetime)
 
-    
     ulklc_pd['Province/State'] = 'All'
     ulklc_pd = ulklc_pd[['date', 'Province/State', 'Country/Region', 'confirmed', 'recovered', 'death']]
     
@@ -57,21 +55,16 @@ def Load():
         clean_pd.reindex(['Province/State', 'Country/Region'])
         return clean_pd
 
-    # def unitePD(confirmed, death, recovered):
     def unitePD(confirmed, death):
         confirmed_clean = cleanPD(confirmed)
         confirmed_clean.rename(columns={'value':'confirmed'}, inplace=True)
         death_clean = cleanPD(death)
         death_clean.rename(columns={'value':'death'}, inplace=True)
-        # recovered_clean = cleanPD(recovered)
-        # recovered_clean.rename(columns={'value':'recovered'}, inplace=True)
-        union = confirmed_clean.merge(death_clean, how='left')#.merge(recovered_clean, how='left')
+        union = confirmed_clean.merge(death_clean, how='left')
 
-        # union = union[['date', 'Province/State', 'Country/Region', 'confirmed', 'recovered', 'death']]
         union = union[['date', 'Province/State', 'Country/Region', 'confirmed', 'death']]
         return union
 
-    # union = unitePD(covid19_confirmed_pd, covid19_death_pd, covid19_recovered_pd)
     union_ = unitePD(covid19_confirmed_pd, covid19_death_pd)
 
     union_agg = union_[['Province/State', 'Country/Region']].drop_duplicates().groupby(['Country/Region']).agg({ 'Country/Region': 'count'})
@@ -83,35 +76,17 @@ def Load():
     union_.loc[:,'Province/State'] = union_.apply(lambda row: 'Main' if str(row['Province/State']) == 'nan' else str(row['Province/State']), axis=1)
     union_.loc[:,'recovered'] = 0
 
-    # print('--------- START')
-    # print(union_[(union_['Country/Region'] == 'United Kingdom') & (union_['Province/State'] == 'Main')])
-    
     union = ulklc_pd.append(union_, sort=True)
 
     def transform_change(union_pd, country_region, province_state):
-        # if str(province_state) == 'nan' or str(province_state) == 'All':
-        #     res_pd = union_pd.loc[(union_pd['Country/Region'] == str(country_region))].copy(deep = True)
-        # else:
         res_pd = union_pd.loc[(union_pd['Country/Region'] == str(country_region)) & (union_pd['Province/State'] == str(province_state))].copy(deep = True)
 
-        
         res_pd.loc[:, 'confirmed_change'] = res_pd.loc[:, 'confirmed'].diff(1).fillna(0)
         res_pd.loc[:, 'death_change'] = res_pd.loc[:, 'death'].diff(1).fillna(0)
         res_pd.loc[:, 'recovered_change'] = res_pd.loc[:, 'recovered'].diff(1).fillna(0)
 
-        # res_pd.loc[:, 'growth'] = (res_pd.loc[:, 'confirmed'] / res_pd.loc[:, 'confirmed'].shift(1)).fillna(0)
-        # res_pd.loc[:, 'growth_5day'] = res_pd.loc[:, 'Growth'].rolling(window=5).mean()
-
-        # res_pd.loc[:, 'recovered'] = (res_pd.loc[:, 'confirmed'] - res_pd.loc[:, 'death']).shift(20).fillna(0)
-        # res_pd.loc[:, 'recovered'] = (res_pd.loc[:, 'confirmed'] - res_pd.loc[:, 'death']).shift(25).fillna(0)
-        # res_pd.loc[:, 'recovered'] = (res_pd.loc[:, 'confirmed'] - res_pd.loc[:, 'death']).shift(35).fillna(0)
-
-
         res_pd.loc[:, 'active'] = res_pd.loc[:, 'confirmed'] - res_pd.loc[:, 'recovered'] - res_pd.loc[:, 'death']
         res_pd.loc[:, 'active_change'] = res_pd.loc[:, 'active'].diff(1).fillna(0)
-
-        # res_pd.loc[:, 'Province/State'] = res_pd.apply(lambda row: row['Country/Region'] if str(row['Province/State']) == 'nan' else row['Province/State'], axis=1)
-        # res_pd.loc[:, 'Province/State'] = res_pd.apply(lambda row: row['Country/Region'] if str(row['Province/State']) == 'nan' else row['Province/State'], axis=1)
 
         # Take Hong Kong out from China
         # res_pd.loc[:, 'Country/Region'] = res_pd.apply(lambda row: row['Province/State'] if str(row['Province/State']) == 'Hong Kong' else row['Country/Region'], axis=1)
@@ -129,9 +104,6 @@ def Load():
         else:
             union_change = union_change.append(transform_pd)
 
-    # print('--------- NEXT')
-    # print(union_change[(union_change['Country/Region'] == 'United Kingdom') & (union_change['Province/State'] == 'Main')])
-    
 
     countries_pd = union[['Country/Region']].drop_duplicates()
     # union_change_aggregated = union_change[~(union_change['Province/State'] == 'All')].groupby(['date', 'Country/Region']).agg(
@@ -150,10 +122,6 @@ def Load():
 
     # union_change_aggregated = union_change_aggregated[union_change_aggregated['Province/State'] > 1]
     # union_change_aggregated['Province/State'] = 'All' # union_change_aggregated['Country/Region']
-
-    # print('--------- AGG')
-    # print(union_change_aggregated[(union_change_aggregated['Country/Region'] == 'United Kingdom') & (union_change_aggregated['Province/State'] == 'Main')])
-    # print(union_change_aggregated[(union_change_aggregated['Country/Region'] == 'United Kingdom')])
 
 
     union_change_world_aggregated = union_change[(union_change['Province/State'] == 'All')].groupby(['date']).agg(
@@ -189,14 +157,10 @@ def Load():
 
         __union_change = __union_change.append(res_pd, sort=True)
 
-    # print('------ TTTT')
-    # print(countries_provinces_pd)
     union_change = __union_change
     
-
-    
-    # starting_dates = [1, 100, 200, 300, 500, 750, 1000]
-    starting_dates = [1]
+    starting_dates = [1, 100, 200, 300, 500, 750, 1000]
+    # starting_dates = [1]
     union_change_0 = {}
     union_change_0_confirmed = {}
     union_change_0_growth = {}
@@ -218,7 +182,7 @@ def Load():
 
         first_infection[start_idx] = union_change[union_change['confirmed'] >= start_idx][['date', 'Country/Region', 'Province/State']].groupby(['Country/Region', 'Province/State']).min().reset_index().rename(columns={'date':'infection'})
         first_death[start_idx] = union_change[union_change['death'] >= start_idx][['date', 'Country/Region', 'Province/State']].groupby(['Country/Region', 'Province/State']).min().reset_index().rename(columns={'date':'death'})
-        first_dates[start_idx] = first_infection[start_idx].merge(first_death[start_idx], how='left')#.merge(first_recovered[start_idx], how='left')
+        first_dates[start_idx] = first_infection[start_idx].merge(first_death[start_idx], how='left')
 
         print('         Covid19 computing first merge @ ' + datetime.datetime.now().strftime("%H:%M:%S") + ' ...')
 
@@ -321,18 +285,6 @@ def Load():
             else:
                 _union_change_0_active = _union_change_0_active.merge(pd_0, how='outer', left_index=True, right_index=True)
 
-        # for index, row in countries_provinces_pd.iterrows():
-        #     country_region = str(row['Country/Region'])
-        #     province_state = str(row['Province/State'])
-        #     province_state = country_region if province_state == 'nan' else province_state
-        #     name = country_region if province_state == 'All' else country_region + ' / ' + province_state
-        #     pd_0 = _union_change_0[(_union_change_0['Country/Region'] == country_region) & (_union_change_0['Province/State'] == province_state)][['Province/State', 'recovered']].rename(columns={'recovered': name }).drop(columns=['Province/State'])
-        #     pd_0 = pd_0.drop_duplicates()
-        #     if _union_change_0_recovered.empty:
-        #         _union_change_0_recovered = pd_0
-        #     else:
-        #         _union_change_0_recovered = _union_change_0_recovered.merge(pd_0, how='outer', left_index=True, right_index=True)
-
         union_change_0[start_idx] = _union_change_0
         union_change_0_confirmed[start_idx] = _union_change_0_confirmed
         union_change_0_growth[start_idx] = _union_change_0_growth
@@ -351,7 +303,3 @@ def Load():
     all_from_0_active = union_change_0_active
 
     __lock_loading.release()
-    
-
-    # return union_change, union_change_0, union_change_0_confirmed, union_change_0_active, union_change_0_death, union_change_0_recovered, first_infection, first_death, first_recovered, first_dates
-    # return union_change, union_change_0, union_change_0_confirmed, union_change_0_growth, union_change_0_death, first_infection, first_death, first_dates

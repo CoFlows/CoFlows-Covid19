@@ -37,17 +37,10 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
 
     if type_name == 'Statistics' and state_name == 'All':
         ranked_countries = cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World') & (cov19.all_date['date'] == last_date)] if country_name == 'World' else cov19.all_date[(cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['date'] == last_date)]
-        # ranked_countries = ranked_countries.sort_values(by=['confirmed', 'active'], ascending=False)
-        # df = ranked_countries[['Country/Region', 'confirmed', 'confirmed_change', 'active', 'active_change', 'death', 'death_change']].copy(deep=True) if country_name == 'World' else ranked_countries[['Province/State', 'confirmed', 'confirmed_change', 'active', 'active_change', 'death', 'death_change']].copy(deep=True) 
-        # df[['confirmed', 'confirmed_change', 'active', 'active_change', 'death', 'death_change']] = df[['confirmed', 'confirmed_change', 'active', 'active_change', 'death', 'death_change']].apply(pd.to_numeric)
-        # df['recovered'] = round(100 * (df['confirmed'] - df['active'] - df['death']) / df['confirmed'], 2)
 
         ranked_countries = ranked_countries.sort_values(by=['confirmed'], ascending=False)
-        # print(ranked_countries)
         df = ranked_countries[['Country/Region', 'confirmed', 'confirmed_change', 'recovered', 'recovered_change', 'active', 'active_change', 'death', 'death_change', 'growth', 'growth_5day']].copy(deep=True) if country_name == 'World' else ranked_countries[['Province/State', 'confirmed', 'confirmed_change', 'recovered', 'recovered_change', 'active', 'active_change', 'death', 'death_change', 'growth', 'growth_5day']].copy(deep=True) 
         df[['confirmed', 'confirmed_change', 'death', 'death_change', 'growth', 'growth_5day']] = df[['confirmed', 'confirmed_change', 'death', 'death_change', 'growth', 'growth_5day']].apply(pd.to_numeric)
-        # df['recovered'] = round(100 * (df['confirmed'] - df['active'] - df['death']) / df['confirmed'], 2)
-
 
         def daysCalcCountry(start_idx, x):
             __df = cov19.first_infection[start_idx][(cov19.first_infection[start_idx]['Country/Region'] == x) & (cov19.first_infection[start_idx]['Province/State'] == 'All')]['infection']
@@ -64,7 +57,7 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
                 return (datetime.datetime.now() - __df.iloc[0]).days
  
 
-        def daysCalcCountryTest(x):
+        def daysCalcCountryProjection(x):
             __df = cov19.all_date[(cov19.all_date['Country/Region'] == x) & (cov19.all_date['Province/State'] == 'All')]
             if __df.empty:
                 return 0
@@ -78,7 +71,7 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
                 else:
                     return confirmed_data.iloc[n]
 
-        def daysCalcStateTest(x):
+        def daysCalcStateProjection(x):
             __df = cov19.all_date[(cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['Province/State'] == x)]
             if __df.empty:
                 return 0
@@ -88,7 +81,6 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
                 if n > 2:
                     return round(confirmed_data.iloc[n] * confirmed_data.iloc[n] / confirmed_data.iloc[n - 1], 0)
          
-        # df['Days Infected'] = df['Country/Region'].apply(lambda x: (datetime.datetime.now() - cov19.first_infection[start_idx][(cov19.first_infection[start_idx]['Country/Region'] == x) & (cov19.first_infection[start_idx]['Province/State'] == 'All')]['infection'].iloc[0]).days) if country_name == 'World' else df['Province/State'].apply(lambda x: (datetime.datetime.now() - cov19.first_infection[start_idx][((cov19.first_infection[start_idx]['Country/Region'] == country_name) & (cov19.first_infection[start_idx]['Province/State'] == x))]['infection'].iloc[0]).days)
         df['Days Infected'] = df['Country/Region'].apply(lambda x: daysCalcCountry(1, x)) if country_name == 'World' else df['Province/State'].apply(lambda x: daysCalcState(1, x))
 
         # df['Days 100'] = df['Country/Region'].apply(lambda x: daysCalcCountry(100, x)) if country_name == 'World' else df['Province/State'].apply(lambda x: daysCalcState(100, x))
@@ -98,9 +90,8 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
         # df['Days 750'] = df['Country/Region'].apply(lambda x: daysCalcCountry(750, x)) if country_name == 'World' else df['Province/State'].apply(lambda x: daysCalcState(750, x))
         # df['Days 1000'] = df['Country/Region'].apply(lambda x: daysCalcCountry(1000, x)) if country_name == 'World' else df['Province/State'].apply(lambda x: daysCalcState(1000, x))
 
-        df['Confirmed t+1'] = df['Country/Region'].apply(daysCalcCountryTest) if country_name == 'World' else df['Province/State'].apply(daysCalcStateTest)
+        df['Confirmed t+1'] = df['Country/Region'].apply(daysCalcCountryProjection) if country_name == 'World' else df['Province/State'].apply(daysCalcStateProjection)
         
-        # df = df.rename(columns={'confirmed': 'Confirmed', 'confirmed_change': 'Confirmed Chg' , 'active': 'Active', 'active_change': 'Active Chg', 'death': 'Dead', 'death_change': 'Dead Chg', 'recovered': 'Recovered %'})
         df = df.rename(columns={'confirmed': 'Confirmed', 'confirmed_change': 'Confirmed Chg', 'recovered': 'Recovered', 'recovered_change': 'Recovered Chg', 'active': 'Active', 'active_change': 'Active Chg' , 'death': 'Dead', 'death_change': 'Dead Chg', 'growth': 'Growth Rate', 'growth_5day': 'Growth 5 Day' })
         
         return df
@@ -112,18 +103,14 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
         if cohort_name == 'Dead':
             df = cov19.all_from_0_death[day_count_value]
         if cohort_name == 'Active':
-            df = cov19.all_from_0_death[day_count_value]
+            df = cov19.all_from_0_active[day_count_value]
         if cohort_name == 'Recovered':
-            df = cov19.all_from_0_death[day_count_value]
-        
-        
-            
-         
+            df = cov19.all_from_0_recovered[day_count_value]
+
         df = df[[col for col in df.columns if '/' not in col]] if country_name == 'World' else df[[col for col in df.columns if (country_name + ' /') in col]]
 
         ranked_countries = cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World') & (cov19.all_date['date'] == last_date)] if country_name == 'World' else cov19.all_date[~(cov19.all_date['Province/State'] == 'All') & (cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['date'] == last_date)]
 
-        # print(ranked_countries[['Country/Region', 'Province/State']])
         if cohort_name == 'Confirmed':
             ranked_countries = ranked_countries.sort_values(by=['confirmed'], ascending=False)
             ranked_countries = ranked_countries[ranked_countries['confirmed'] > day_count_value]
@@ -141,10 +128,9 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
             ranked_countries = ranked_countries[ranked_countries['growth'] > day_count_value]
 
         df = df[ranked_countries['Country/Region']]  if country_name == 'World' else df[ranked_countries['Country/Region'] + ' / ' + ranked_countries['Province/State']]
-        # df = df[ranked_countries['Country/Region']]  if country_name == 'World' else df[ranked_countries.apply(lambda x: x['Country/Region'] + '/' + x['Province/State'])]
+        
         if not country_name == 'World':
             for col in df.columns:
-                # print(col + ' --> ' + col.replace(country_name + ' / ', ''))
                 if ' / ' in col:
                     df = df.rename(columns={col : col.replace(country_name + ' / ', '')})
         df = df.reset_index()
@@ -154,7 +140,6 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
     
     else:
         df = cov19.all_date[(cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['Province/State'] == state_name)]
-        # df = df[['date', 'confirmed', 'confirmed_change', 'active', 'recovered', 'death']]
         df = df[['date', 'confirmed', 'confirmed_change', 'active', 'active_change', 'recovered', 'recovered_change', 'death', 'growth', 'growth_5day']]
 
         return df 
@@ -170,7 +155,6 @@ def getAllData():
     cov19.Load()
     df = cov19.all_date
     df = df.applymap(lambda x: str(x) if isinstance(x, datetime.datetime) else str(x))
-    # df = df[['date', 'Country/Region', 'Province/State', 'confirmed', 'confirmed_change', 'active', 'active_change', 'recovered', 'recovered_change', 'death', 'death_change']]
     df = df[['date', 'Country/Region', 'Province/State', 'confirmed', 'confirmed_change', 'active', 'active_change', 'recovered', 'recovered_change', 'death', 'death_change', 'growth', 'growth_5day']]
     return df.T.to_dict().values()
 
@@ -237,7 +221,6 @@ def run(port, path):
 
             country_region_list = [cty[0] for cty in cov19.all_date[['Country/Region']].drop_duplicates().values.tolist()]
             country_region_list.sort()
-            # country_region_list.insert(0, 'World')
             province_state_pd = cov19.all_date[['Country/Region', 'Province/State']].drop_duplicates()
             print('------------------------')
             print(world_population_pd[world_population_pd['Country'].isin(country_region_list)])
@@ -259,7 +242,6 @@ def run(port, path):
                             html.Div(id='link_id', children=[ 
                                 
                             ]),
-                            # html.Div( ])
                         ],
                     ),
 
@@ -346,8 +328,6 @@ def run(port, path):
                             )
                         ]
                     ),
-
-                    # html.Br(),
 
                     # Simple table
                     html.Div(
@@ -436,7 +416,7 @@ def run(port, path):
                                             dcc.Dropdown(
                                                 id='daycount_chart_output_control_1',
                                                 clearable=False,
-                                                options=[{'label': ttype, 'value': ttype} for ttype in ['Confirmed', 'Dead', 'Growth Rate']],
+                                                options=[{'label': ttype, 'value': ttype} for ttype in ['Confirmed', 'Active', 'Recovered', 'Dead', 'Growth Rate']],
                                                 value = 'Confirmed'
                                             )
                                         ],
@@ -520,7 +500,6 @@ def run(port, path):
                                             dcc.Dropdown(
                                                 id='statistics_chart_output_control_1',
                                                 clearable=False,
-                                                # options=[{'label': ttype, 'value': ttype} for ttype in ['Confirmed', 'Active', 'Dead', 'Days Infected']],
                                                 options=[{'label': ttype, 'value': ttype} for ttype in ['Confirmed', 'Active', 'Recovered', 'Dead', 'Growth Rate', 'Growth 5 Day', 'Days Infected']],
                                                 value = 'Confirmed'
                                             )
@@ -533,7 +512,6 @@ def run(port, path):
                                             dcc.Dropdown(
                                                 id='statistics_chart_output_control_2',
                                                 clearable=False,
-                                                # options=[{'label': ttype, 'value': ttype} for ttype in ['Confirmed', 'Active', 'Dead', 'Days Infected']],
                                                 options=[{'label': ttype, 'value': ttype} for ttype in ['Confirmed', 'Active', 'Recovered', 'Dead', 'Growth Rate', 'Growth 5 Day', 'Days Infected']],
                                                 value = 'Days Infected'
                                             )
@@ -628,13 +606,8 @@ def run(port, path):
                 ]
             )
             def set_data_types(types_name):
-                # if types_name == 'Timeseries' or types_name == 'Day count':
                 lst = ['Table', 'Chart']
                 return [ {'label': element, 'value': element} for element in lst ], lst[0]
-
-                # else:
-                #     lst = ['Table']
-                #     return [ {'label': element, 'value': element} for element in lst ], lst[0]
 
             @app.callback(
                 Output('link_id', 'children'),
@@ -670,12 +643,9 @@ def run(port, path):
                     Input('countries', 'value'),
                     Input('states', 'value'),
                     Input('types', 'value'),
-                    # Input('subcontrol_1', 'value'),
-                    # Input('subcontrol_2', 'value'),
                     Input('data_types', 'value'),
                 ]
             )
-            # def set_table(country_name, state_name, type_name, cohort_name, day_count_value, data_type):
             def set_table(country_name, state_name, type_name, data_type):
 
                 df = getData(country_name, state_name, type_name, '', 1)
@@ -704,14 +674,11 @@ def run(port, path):
                     Input('countries', 'value'),
                     Input('states', 'value'),
                     Input('types', 'value'),
-                    # Input('subcontrol_1', 'value'),
-                    # Input('subcontrol_2', 'value'),
                     Input('data_types', 'value'),
                     Input('timeseries_chart_selected', 'value'),
                     Input('timeseries_linear_log_control', 'value'),
                 ]
             )
-            # def set_timeseris_chart(country_name, state_name, type_name, cohort_name, day_count_value, data_type, selected_charts, linear_log_control):
             def set_timeseris_chart(country_name, state_name, type_name, data_type, selected_charts, linear_log_control):
 
                 df = getData(country_name, state_name, type_name, '', 1)
@@ -740,7 +707,6 @@ def run(port, path):
                                         x = x_axis,
                                         y = y_axis,
                                         mode='lines',
-                                        # line=dict(color='#576D22', width=4)
                                     ))
 
                         return [
@@ -749,7 +715,6 @@ def run(port, path):
                                 data = charts,
                                 layout = dict(
                                     xaxis={
-                                        # 'title': 'Delta',
                                         'zeroline': False,
                                         'tickmode': 'array',
                                         'tickvals': x_axis,
@@ -783,12 +748,9 @@ def run(port, path):
                     Input('countries', 'value'),
                     Input('states', 'value'),
                     Input('types', 'value'),
-                    # Input('subcontrol_1', 'value'),
-                    # Input('subcontrol_2', 'value'),
                     Input('data_types', 'value'),
                 ]
             )
-            # def set_timeseris_chart_select(country_name, state_name, type_name, cohort_name, day_count_value, data_type):
             def set_timeseris_chart_select(country_name, state_name, type_name, data_type):
 
                 if type_name == 'Timeseries' and data_type == 'Chart':
@@ -854,7 +816,6 @@ def run(port, path):
                                             x = x_axis,
                                             y = y_axis,
                                             mode='lines',
-                                            # line=dict(color='#576D22', width=4)
                                         ))
 
                             return [
@@ -863,7 +824,6 @@ def run(port, path):
                                     data = charts,
                                     layout = dict(
                                         xaxis={
-                                            # 'title': 'Delta',
                                             'zeroline': False,
                                             'tickmode': 'array',
                                             'tickvals': x_axis,
@@ -957,7 +917,6 @@ def run(port, path):
                                     y = y_axis,
                                     text=df[df[region_type] == val][region_type],
                                     mode='markers+text',
-                                    # line=dict(color='#576D22', width=4)
                                     marker={
                                         'size': 20,
                                         'opacity': 0.5,
@@ -975,7 +934,6 @@ def run(port, path):
                                 y = y_axis,
                                 text=df[~(df[region_type].isin(selected_charts))][region_type],
                                 mode='markers',
-                                # line=dict(color='#576D22', width=4)
                                 marker={
                                     'size': 10,
                                     'opacity': 0.5,
