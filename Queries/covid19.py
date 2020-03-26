@@ -39,7 +39,7 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
         ranked_countries = cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World') & (cov19.all_date['date'] == last_date)] if country_name == 'World' else cov19.all_date[(cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['date'] == last_date)]
 
         ranked_countries = ranked_countries.sort_values(by=['confirmed'], ascending=False)
-        df = ranked_countries[['Country/Region', 'confirmed', 'confirmed_change', 'recovered', 'recovered_change', 'active', 'active_change', 'death', 'death_change', 'growth', 'growth_5day']].copy(deep=True) if country_name == 'World' else ranked_countries[['Province/State', 'confirmed', 'confirmed_change', 'recovered', 'recovered_change', 'active', 'active_change', 'death', 'death_change', 'growth', 'growth_5day']].copy(deep=True) 
+        df = ranked_countries[['Continent', 'Country/Region', 'confirmed', 'confirmed_change', 'recovered', 'recovered_change', 'active', 'active_change', 'death', 'death_change', 'growth', 'growth_5day']].copy(deep=True) if country_name == 'World' else ranked_countries[['Province/State', 'confirmed', 'confirmed_change', 'recovered', 'recovered_change', 'active', 'active_change', 'death', 'death_change', 'growth', 'growth_5day']].copy(deep=True) 
         df[['confirmed', 'confirmed_change', 'death', 'death_change', 'growth', 'growth_5day']] = df[['confirmed', 'confirmed_change', 'death', 'death_change', 'growth', 'growth_5day']].apply(pd.to_numeric)
 
         def daysCalcCountry(start_idx, x):
@@ -155,8 +155,8 @@ def getAllData():
     cov19.Load()
     df = cov19.all_date
     df = df.applymap(lambda x: str(x) if isinstance(x, datetime.datetime) else str(x))
-    df = df[['date', 'Country/Region', 'Province/State', 'confirmed', 'confirmed_change', 'active', 'active_change', 'recovered', 'recovered_change', 'death', 'death_change', 'growth', 'growth_5day']]
-    return df.T.to_dict().values()
+    df = df[['date', 'Continent', 'Country/Region', 'Province/State', 'confirmed', 'confirmed_change', 'active', 'active_change', 'recovered', 'recovered_change', 'death', 'death_change', 'growth', 'growth_5day']]
+    return df.T.to_dict().values() 
 
 def getAllDataFromX():
     cov19.Load()
@@ -1018,7 +1018,7 @@ def run(port, path):
                     del __union_change, __union_change_0, __union_change_0_confirmed, __union_change_0_active, __union_change_0_death, __union_change_0_recovered, __first_infection, __first_death, __first_recovered, __first_dates
                 except Exception as e: 
                     pass
-
+ 
                 func = request.environ.get('werkzeug.server.shutdown')
                 if func is None:
                     raise RuntimeError('Not running with the Werkzeug Server')

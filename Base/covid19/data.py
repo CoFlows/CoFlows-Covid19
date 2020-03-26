@@ -34,19 +34,21 @@ def Load():
 
     print('Covid19 Loading data starting @ ' + datetime.datetime.now().strftime("%H:%M:%S") + ' ...')
 
+    # Load data from John Hopkins University
     jhu_covid19_confirmed_url = 'https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv'
     jhu_covid19_death_url = 'https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv'
 
     covid19_confirmed_pd = pd.read_csv(jhu_covid19_confirmed_url)
     covid19_death_pd = pd.read_csv(jhu_covid19_death_url)
 
+    # Load data from ULKLC
     ulklc_url = 'https://raw.githubusercontent.com/ulklc/covid19-timeseries/master/countryReport/raw/rawReport.csv'
     ulklc_pd = pd.read_csv(ulklc_url)
     ulklc_pd = ulklc_pd.rename(columns={'day': 'date', 'countryName': 'Country/Region', 'region': 'Continent', 'lat': 'Lat', 'lon': 'Long'})
     ulklc_pd[['date']] = ulklc_pd[['date']].apply(pd.to_datetime)
 
     ulklc_pd['Province/State'] = 'All'
-    ulklc_pd = ulklc_pd[['date', 'Province/State', 'Country/Region', 'confirmed', 'recovered', 'death']]
+    ulklc_pd = ulklc_pd[['date', 'Continent', 'Province/State', 'Country/Region', 'confirmed', 'recovered', 'death']]
     
     def cleanPD(dirty_pd):
         clean_pd = dirty_pd.melt(id_vars=['Province/State', 'Country/Region', 'Lat', 'Long'])
@@ -75,6 +77,8 @@ def Load():
     
     union_.loc[:,'Province/State'] = union_.apply(lambda row: 'Main' if str(row['Province/State']) == 'nan' else str(row['Province/State']), axis=1)
     union_.loc[:,'recovered'] = 0
+    continents = ulklc_pd[['Country/Region', 'Continent']]
+    union_ = union_.merge(continents, left_on=['Country/Region'], right_on=['Country/Region'], how='left')
 
     union = ulklc_pd.append(union_, sort=True)
 
