@@ -44,7 +44,7 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
 
         ranked_countries = ranked_countries.sort_values(by=['confirmed'], ascending=False)
         # print(ranked_countries)
-        df = ranked_countries[['Country/Region', 'confirmed', 'confirmed_change', 'death', 'death_change', 'growth', 'growth_5day']].copy(deep=True) if country_name == 'World' else ranked_countries[['Province/State', 'confirmed', 'confirmed_change', 'death', 'death_change', 'growth', 'growth_5day']].copy(deep=True) 
+        df = ranked_countries[['Country/Region', 'confirmed', 'confirmed_change', 'recovered', 'recovered_change', 'active', 'active_change', 'death', 'death_change', 'growth', 'growth_5day']].copy(deep=True) if country_name == 'World' else ranked_countries[['Province/State', 'confirmed', 'confirmed_change', 'recovered', 'recovered_change', 'active', 'active_change', 'death', 'death_change', 'growth', 'growth_5day']].copy(deep=True) 
         df[['confirmed', 'confirmed_change', 'death', 'death_change', 'growth', 'growth_5day']] = df[['confirmed', 'confirmed_change', 'death', 'death_change', 'growth', 'growth_5day']].apply(pd.to_numeric)
         # df['recovered'] = round(100 * (df['confirmed'] - df['active'] - df['death']) / df['confirmed'], 2)
 
@@ -87,7 +87,7 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
                 n = len(confirmed_data) - 1
                 if n > 2:
                     return round(confirmed_data.iloc[n] * confirmed_data.iloc[n] / confirmed_data.iloc[n - 1], 0)
-        
+         
         # df['Days Infected'] = df['Country/Region'].apply(lambda x: (datetime.datetime.now() - cov19.first_infection[start_idx][(cov19.first_infection[start_idx]['Country/Region'] == x) & (cov19.first_infection[start_idx]['Province/State'] == 'All')]['infection'].iloc[0]).days) if country_name == 'World' else df['Province/State'].apply(lambda x: (datetime.datetime.now() - cov19.first_infection[start_idx][((cov19.first_infection[start_idx]['Country/Region'] == country_name) & (cov19.first_infection[start_idx]['Province/State'] == x))]['infection'].iloc[0]).days)
         df['Days Infected'] = df['Country/Region'].apply(lambda x: daysCalcCountry(1, x)) if country_name == 'World' else df['Province/State'].apply(lambda x: daysCalcState(1, x))
 
@@ -101,7 +101,7 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
         df['Confirmed t+1'] = df['Country/Region'].apply(daysCalcCountryTest) if country_name == 'World' else df['Province/State'].apply(daysCalcStateTest)
         
         # df = df.rename(columns={'confirmed': 'Confirmed', 'confirmed_change': 'Confirmed Chg' , 'active': 'Active', 'active_change': 'Active Chg', 'death': 'Dead', 'death_change': 'Dead Chg', 'recovered': 'Recovered %'})
-        df = df.rename(columns={'confirmed': 'Confirmed', 'confirmed_change': 'Confirmed Chg' , 'death': 'Dead', 'death_change': 'Dead Chg', 'growth': 'Growth Rate', 'growth_5day': 'Growth 5 Day' })
+        df = df.rename(columns={'confirmed': 'Confirmed', 'confirmed_change': 'Confirmed Chg', 'recovered': 'Recovered', 'recovered_change': 'Recovered Chg', 'active': 'Active', 'active_change': 'Active Chg' , 'death': 'Dead', 'death_change': 'Dead Chg', 'growth': 'Growth Rate', 'growth_5day': 'Growth 5 Day' })
         
         return df
                     
@@ -111,6 +111,12 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
             df = cov19.all_from_0_growth[day_count_value]
         if cohort_name == 'Dead':
             df = cov19.all_from_0_death[day_count_value]
+        if cohort_name == 'Active':
+            df = cov19.all_from_0_death[day_count_value]
+        if cohort_name == 'Recovered':
+            df = cov19.all_from_0_death[day_count_value]
+        
+        
             
          
         df = df[[col for col in df.columns if '/' not in col]] if country_name == 'World' else df[[col for col in df.columns if (country_name + ' /') in col]]
@@ -121,13 +127,15 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
         if cohort_name == 'Confirmed':
             ranked_countries = ranked_countries.sort_values(by=['confirmed'], ascending=False)
             ranked_countries = ranked_countries[ranked_countries['confirmed'] > day_count_value]
-        # if cohort_name == 'Active':
-        #     ranked_countries = ranked_countries.sort_values(by=['active'], ascending=False)
-        #     ranked_countries = ranked_countries[ranked_countries['active'] > day_count_value]
+        if cohort_name == 'Active':
+            ranked_countries = ranked_countries.sort_values(by=['active'], ascending=False)
+            ranked_countries = ranked_countries[ranked_countries['active'] > day_count_value]
+        if cohort_name == 'Recovered':
+            ranked_countries = ranked_countries.sort_values(by=['recovered'], ascending=False)
+            ranked_countries = ranked_countries[ranked_countries['recovered'] > day_count_value]
         if cohort_name == 'Dead':
             ranked_countries = ranked_countries.sort_values(by=['death'], ascending=False)
             ranked_countries = ranked_countries[ranked_countries['death'] > day_count_value]
-
         if cohort_name == 'Growth Rate':
             ranked_countries = ranked_countries.sort_values(by=['growth'], ascending=False)
             ranked_countries = ranked_countries[ranked_countries['growth'] > day_count_value]
@@ -147,7 +155,7 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
     else:
         df = cov19.all_date[(cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['Province/State'] == state_name)]
         # df = df[['date', 'confirmed', 'confirmed_change', 'active', 'recovered', 'death']]
-        df = df[['date', 'confirmed', 'confirmed_change', 'death', 'growth', 'growth_5day']]
+        df = df[['date', 'confirmed', 'confirmed_change', 'active', 'active_change', 'recovered', 'recovered_change', 'death', 'growth', 'growth_5day']]
 
         return df 
 
@@ -163,7 +171,7 @@ def getAllData():
     df = cov19.all_date
     df = df.applymap(lambda x: str(x) if isinstance(x, datetime.datetime) else str(x))
     # df = df[['date', 'Country/Region', 'Province/State', 'confirmed', 'confirmed_change', 'active', 'active_change', 'recovered', 'recovered_change', 'death', 'death_change']]
-    df = df[['date', 'Country/Region', 'Province/State', 'confirmed', 'confirmed_change', 'death', 'death_change', 'growth', 'growth_5day']]
+    df = df[['date', 'Country/Region', 'Province/State', 'confirmed', 'confirmed_change', 'active', 'active_change', 'recovered', 'recovered_change', 'death', 'death_change', 'growth', 'growth_5day']]
     return df.T.to_dict().values()
 
 def getAllDataFromX():
@@ -182,7 +190,9 @@ def getAllDataFromX():
     
     df = df.applymap(lambda x: str(x) if isinstance(x, datetime.datetime) else str(x))
     return df.T.to_dict().values()
-
+ 
+def test():
+    return getData('World', 'All', 'Table', 'Timeseries', 1)
 
 dash_init = True
 __assetsFolder = '/app/mnt/Files/assets'
@@ -511,7 +521,7 @@ def run(port, path):
                                                 id='statistics_chart_output_control_1',
                                                 clearable=False,
                                                 # options=[{'label': ttype, 'value': ttype} for ttype in ['Confirmed', 'Active', 'Dead', 'Days Infected']],
-                                                options=[{'label': ttype, 'value': ttype} for ttype in ['Confirmed', 'Dead', 'Growth Rate', 'Growth 5 Day', 'Days Infected']],
+                                                options=[{'label': ttype, 'value': ttype} for ttype in ['Confirmed', 'Active', 'Recovered', 'Dead', 'Growth Rate', 'Growth 5 Day', 'Days Infected']],
                                                 value = 'Confirmed'
                                             )
                                         ],
@@ -524,7 +534,7 @@ def run(port, path):
                                                 id='statistics_chart_output_control_2',
                                                 clearable=False,
                                                 # options=[{'label': ttype, 'value': ttype} for ttype in ['Confirmed', 'Active', 'Dead', 'Days Infected']],
-                                                options=[{'label': ttype, 'value': ttype} for ttype in ['Confirmed', 'Dead', 'Growth Rate', 'Growth 5 Day', 'Days Infected']],
+                                                options=[{'label': ttype, 'value': ttype} for ttype in ['Confirmed', 'Active', 'Recovered', 'Dead', 'Growth Rate', 'Growth 5 Day', 'Days Infected']],
                                                 value = 'Days Infected'
                                             )
                                         ],
@@ -1064,3 +1074,4 @@ def run(port, path):
 
  
     run(8080, '/charts/dash/')
+ 
