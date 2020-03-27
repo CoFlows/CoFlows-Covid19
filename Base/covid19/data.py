@@ -97,13 +97,14 @@ def Load(force):
             latest_recovered_value = lastest_ulklc_pd['recovered'][lastest_ulklc_pd.last_valid_index()]
             latest_death_value = lastest_ulklc_pd['death'][lastest_ulklc_pd.last_valid_index()]
             
-            if (latest_confirmed_value >= new_confirmed_value) or (latest_recovered_value >= new_recovered_value) or (latest_death_value >= new_death_value):
+            # if (latest_confirmed_value >= new_confirmed_value) or (latest_recovered_value >= new_recovered_value) or (latest_death_value >= new_death_value):
+            if 1 == 1:
                 new_confirmed_value = max(latest_confirmed_value, new_confirmed_value)
                 new_recovered_value = max(latest_recovered_value, new_recovered_value)
                 new_death_value = max(latest_death_value, new_death_value)
 
-                # if last_date == todays_date:
-                if 1 == 1:
+                if last_date == todays_date:
+                # if 1 == 1:
                     ulklc_pd.loc[(ulklc_pd['Country/Region'] == name) & (ulklc_pd['date'] == last_date), 'confirmed'] = new_confirmed_value
                     ulklc_pd.loc[(ulklc_pd['Country/Region'] == name) & (ulklc_pd['date'] == last_date), 'recovered'] = new_recovered_value
                     ulklc_pd.loc[(ulklc_pd['Country/Region'] == name) & (ulklc_pd['date'] == last_date), 'death'] = new_death_value
@@ -183,14 +184,14 @@ def Load(force):
                 new_recovered_value = last_rows_pd['recovered'][last_rows_pd.last_valid_index()]
                 new_death_value = last_rows_pd['death'][last_rows_pd.last_valid_index()]
 
-                # if not(latest_confirmed_value == new_confirmed_value) or not(latest_recovered_value == new_recovered_value) or not(latest_death_value == new_death_value):
-                if (latest_confirmed_value >= new_confirmed_value) or (latest_recovered_value >= new_recovered_value) or (latest_death_value >= new_death_value):
+                # if (latest_confirmed_value >= new_confirmed_value) or (latest_recovered_value >= new_recovered_value) or (latest_death_value >= new_death_value):
+                if 1 == 1:
                     new_confirmed_value = max(latest_confirmed_value, new_confirmed_value)
                     new_recovered_value = max(latest_recovered_value, new_recovered_value)
                     new_death_value = max(latest_death_value, new_death_value)
 
-                    # if last_date == todays_date:
-                    if 1 == 1:
+                    if last_date == todays_date:
+                    # if 1 == 1:
 
                         jhu_union.loc[(jhu_union['Province/State'] == name) & (jhu_union['date'] == last_date), 'confirmed'] = new_confirmed_value
                         jhu_union.loc[(jhu_union['Province/State'] == name) & (jhu_union['date'] == last_date), 'recovered'] = new_recovered_value
