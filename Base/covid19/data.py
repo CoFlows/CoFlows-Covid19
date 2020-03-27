@@ -102,7 +102,8 @@ def Load(force):
                 new_recovered_value = max(latest_recovered_value, new_recovered_value)
                 new_death_value = max(latest_death_value, new_death_value)
 
-                if last_date == todays_date:
+                # if last_date == todays_date:
+                if 1 == 1:
                     ulklc_pd.loc[(ulklc_pd['Country/Region'] == name) & (ulklc_pd['date'] == last_date), 'confirmed'] = new_confirmed_value
                     ulklc_pd.loc[(ulklc_pd['Country/Region'] == name) & (ulklc_pd['date'] == last_date), 'recovered'] = new_recovered_value
                     ulklc_pd.loc[(ulklc_pd['Country/Region'] == name) & (ulklc_pd['date'] == last_date), 'death'] = new_death_value
@@ -188,7 +189,8 @@ def Load(force):
                     new_recovered_value = max(latest_recovered_value, new_recovered_value)
                     new_death_value = max(latest_death_value, new_death_value)
 
-                    if last_date == todays_date:
+                    # if last_date == todays_date:
+                    if 1 == 1:
 
                         jhu_union.loc[(jhu_union['Province/State'] == name) & (jhu_union['date'] == last_date), 'confirmed'] = new_confirmed_value
                         jhu_union.loc[(jhu_union['Province/State'] == name) & (jhu_union['date'] == last_date), 'recovered'] = new_recovered_value
