@@ -42,6 +42,18 @@
     },
     {
       "ID": "scipy"
+    },
+    {
+      "ID": "beautifulsoup4"
+    },
+    {
+      "ID": "spacy"
+    },
+    {
+      "ID": "textblob"
+    },
+    {
+      "ID": "lxml"
     }
   ],
   "Jars": [],
