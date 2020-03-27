@@ -23,7 +23,7 @@ first_dates = {}
 
 __lock_loading = threading.Lock()
 
-
+last_update = None
 
 def Load(force):
     # pd.set_option('display.max_rows', 500)
@@ -31,12 +31,21 @@ def Load(force):
 
     __lock_loading.acquire()
 
-    global all_date, all_from_0, all_from_0_confirmed, all_from_0_growth, all_from_0_active, all_from_0_death, all_from_0_recovered, first_infection, first_death, first_recovered, first_dates
+    global last_update, all_date, all_from_0, all_from_0_confirmed, all_from_0_growth, all_from_0_active, all_from_0_death, all_from_0_recovered, first_infection, first_death, first_recovered, first_dates
 
     if all_date is not None and not force:
         __lock_loading.release()
         return
 
+    this_update = datetime.datetime.now()
+
+    if last_update is not None and (this_update - last_update).hour >= 1:
+        __lock_loading.release()
+        return
+
+    last_update = this_update
+    
+    
     print('Covid19 Loading data starting @ ' + datetime.datetime.now().strftime("%H:%M:%S") + ' ...')
 
     todays_date = datetime.datetime.today().replace(minute=0, hour=0, second=0, microsecond=0)

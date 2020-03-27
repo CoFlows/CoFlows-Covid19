@@ -44,6 +44,6 @@ def pkg():
     qae.Utils.SetFunction("Exchange", qak.MCallback(Exchange)), 
     qae.Utils.SetFunction("Remove", qak.MCallback(Remove)), 
     qae.Utils.SetFunction("Body", qae.Body(Body)), 
-    "0 0 * ? * *", #Cron Schedule
+    "0 * * ? * *", #Cron Schedule
     qae.Utils.SetFunction("Job", qae.Job(Job))
     )
