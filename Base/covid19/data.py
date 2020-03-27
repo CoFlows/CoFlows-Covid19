@@ -25,7 +25,7 @@ __lock_loading = threading.Lock()
 
 
 
-def Load():
+def Load(force):
     # pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
 
@@ -33,7 +33,7 @@ def Load():
 
     global all_date, all_from_0, all_from_0_confirmed, all_from_0_growth, all_from_0_active, all_from_0_death, all_from_0_recovered, first_infection, first_death, first_recovered, first_dates
 
-    if all_date is not None:
+    if all_date is not None and not force:
         __lock_loading.release()
         return
 
@@ -285,7 +285,7 @@ def Load():
     
     starting_dates = [1, 100, 1000]
     # starting_dates = [1, 100, 200, 300, 500, 750, 1000]
-    starting_dates = [1]
+    # starting_dates = [1]
     union_change_0 = {}
     union_change_0_confirmed = {}
     union_change_0_growth = {}

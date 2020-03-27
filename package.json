@@ -7,7 +7,13 @@
       "Content": "Base/covid19/data.py"
     }
   ],
-  "Agents": [],
+  "Agents": [
+    {
+      "Name": "Scraper.py",
+      "Content": "Agents/Scraper.py",
+      "Exe": "pkg"
+    }
+  ],
   "Queries": [
     {
       "Name": "covid19.py",
@@ -51,9 +57,6 @@
     },
     {
       "ID": "textblob"
-    },
-    {
-      "ID": "lxml"
     }
   ],
   "Jars": [],

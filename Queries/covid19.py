@@ -28,54 +28,11 @@ import scipy.optimize as spo
 
 import covid19.data as cov19
 
-from requests import get as get
-from bs4 import BeautifulSoup
-
-from dateutil.parser import parse as parse
-
-import re
-
-def scrape():
-
-    url = 'https://ncov2019.live/data'
-    
-    html_soup = BeautifulSoup(get(url).text, 'html.parser')
-
-    tables = ['sortable_table_Global', 'sortable_table_China', 'sortable_table_Canada', 'sortable_table_Australia']
-    df = pd.DataFrame(columns=['Name', 'confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious'])
-
-    for table_name in tables:
-
-        table = html_soup.find(id=table_name)
-        table_rows = table.find_all('tr')
-        res = []
-        for tr in table_rows:
-            td = tr.find_all('td')
-            row = [re.sub('[^A-Za-z0-9]\W+', '', d.text.strip()).replace(',', '') for d in td]
-            if row:
-                res.append(row)
-        _df = pd.DataFrame(res, columns=['Name', 'confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious'])
-        df = df.append(_df)
-
-        # print('--------: ' + table_name)
-
-    # df[df['Name'] == 'CanberraACT)'] = 'Australian Capital Territory'
-    df['Name'] = df.apply(lambda row: 'Australian Capital Territory' if row['Name'] == 'CanberraACT)' else row['Name'] , axis=1) 
-
-    df[['confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious']] = df[['confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious']].apply(pd.to_numeric)
-
-    print(df)
-
-
-    return 'done'
-
-
-
 # pd.set_option('display.max_columns', 500)
  
 def getData(country_name, state_name, type_name, cohort_name, day_count_value):
 
-    cov19.Load()
+    cov19.Load(False)
 
     if type_name == 'Statistics' and state_name == 'All':
 
@@ -252,14 +209,14 @@ def getJson(country_name, state_name, type_name, cohort_name, _day_count_value):
     return df.T.to_dict().values()
  
 def getAllData():
-    cov19.Load()
+    cov19.Load(False)
     df = cov19.all_date
     df = df.applymap(lambda x: str(x) if isinstance(x, datetime.datetime) else str(x))
     df = df[['date', 'Continent', 'Country/Region', 'Province/State', 'confirmed', 'confirmed_change', 'active', 'active_change', 'recovered', 'recovered_change', 'death', 'death_change', 'growth', 'growth_5day']]
     return df.T.to_dict().values() 
 
 def getAllDataFromX():
-    cov19.Load()
+    cov19.Load(False)
     df_0 = cov19.all_from_0
 
     df = pd.DataFrame()
@@ -310,7 +267,7 @@ def run(port, path):
 
             app.url_base_pathname = path
 
-            cov19.Load()
+            cov19.Load(False)
 
 
             # world_population_url = 'http://api.worldbank.org/v2/en/indicator/SP.POP.TOTL?downloadformat=csv'
