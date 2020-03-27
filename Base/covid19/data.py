@@ -39,7 +39,7 @@ def Load(force):
 
     this_update = datetime.datetime.now()
 
-    if last_update is not None and (this_update - last_update).seconds >= 3600:
+    if last_update is not None and (this_update - last_update).seconds <= 3600:
         __lock_loading.release()
         return
 
