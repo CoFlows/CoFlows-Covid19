@@ -71,6 +71,14 @@
       "Content": "Files/populations.csv"
     },
     {
+      "Name": "docs/CoFlows-covid19-getAllData.png",
+      "Content": "Files/docs/CoFlows-covid19-getAllData.png"
+    },
+    {
+      "Name": "docs/CoFlows-covid19-dash.png",
+      "Content": "Files/docs/CoFlows-covid19-dash.png"
+    },
+    {
       "Name": "assets/resizing.js",
       "Content": "Files/assets/resizing.js"
     },
