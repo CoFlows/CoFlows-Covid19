@@ -35,6 +35,7 @@ def Body(data):
     if data is not None:
         pkg = json.loads(data)
         if pkg['Function'] == 'Main' and pkg['Data'] == 'Initial Execution':
+            print('COVID19 Initial Load')
             cov19.Load(True)
 
     return data
