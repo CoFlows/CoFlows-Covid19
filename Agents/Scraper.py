@@ -32,13 +32,17 @@ def Load(data):
     pass
     
 def Body(data):
+    if data is not None:
+        pkg = json.loads(data)
+        if pkg['Function'] == 'Main' and pkg['Data'] == 'Initial Execution':
+            cov19.Load(True)
+
     return data
 
 def Job(timestamp, data):
     # This section gets executed by the Agent according to the cron-job definition below
     print("COVID19 Scraping Job: " + str(timestamp) + " --> " + str(data))
     cov19.Load(True)
-    
 
 def pkg():
     return qae.FPKG(

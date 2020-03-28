@@ -10,7 +10,7 @@ This Python project offers a set of WebAPI's with an up-to-date dataset of the C
 The reason we are uniting data from these three sources is because:
 * [ncov2019.live](https://ncov2019.live/data) has up-to-date data but no history and certain data points are questionable since this is an automated scraping service from multiple sources.
 * [ULKLC GitHub repo](https://github.com/ulklc/covid19-timeseries) has complete country data which updates quicker than the [JHU GitHub repo](https://github.com/CSSEGISandData/COVID-19).
-* [JHU GitHub repo](https://github.com/CSSEGISandData/COVID-19) appears to be the most followed dataset but is quite slow in terms of updating their data. Their naming convention also changes quite often.
+* [JHU GitHub repo](https://github.com/CSSEGISandData/COVID-19) appears to be the most followed but only updates daily and the naming conventions have historically been inconsistent which makes working with this dataset potentially difficult.
 
 ## Visuals
 The COVID19 project has two ways of visualizing the dataset within this code base. One is through **CoFlows CE** internal UI and the second is a Plotly/Dash visual. 
@@ -32,7 +32,7 @@ https://coflows.quant.app/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&
 
 https://coflows.quant.app/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getAllData
 
-* All the Timeseries for all countries and states. 
+* All the Timeseries for all countries and states reindexed from the nth day of infection.  
 
 https://coflows.quant.app/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getAllDataFromX
 
@@ -45,7 +45,7 @@ To be clear, the **Master Table** is
 
 1. Create a **Master Table** from the country data in the [ULKLC GitHub repo](https://github.com/ulklc/covid19-timeseries).
 2. Extract only the State/Province data from the [JHU GitHub repo](https://github.com/CSSEGISandData/COVID-19)
-3. Add the continent data available in the [ULKLC GitHub repo](https://github.com/ulklc/covid19-timeseries) to the State/Proving data for the sake of consistency.
+3. Add the continent data available in the [ULKLC GitHub repo](https://github.com/ulklc/covid19-timeseries) to the State/Province data for the sake of consistency.
 4. Merge the State/Province data to the **Master Table** which at this stage only contains country data.
 5. Merge the live data from [ncov2019.live](https://ncov2019.live/data) into the **Master Table**. To do this, find the last point in the time-series for each country/state and
     * If the date in that last point is today then exchange that last point to relevant value from [ncov2019.live](https://ncov2019.live/data).
