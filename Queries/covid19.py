@@ -1,3 +1,11 @@
+'''
+ * The MIT License (MIT)
+ * Copyright (c) Arturo Rodriguez All rights reserved.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ '''
+
 import numpy as np
 import pandas as pd
 
@@ -28,18 +36,13 @@ import scipy.optimize as spo
 
 import covid19.data as cov19
 
-# pd.set_option('display.max_columns', 500)
- 
+# Get the data processes by the Pipeline and wrangle to fit the visual needs
 def getData(country_name, state_name, type_name, cohort_name, day_count_value):
 
     cov19.Load(False)
 
     if type_name == 'Statistics' and state_name == 'All':
 
-        # last_date = cov19.all_date[(cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['Province/State'] == state_name)]['date'].max()
-        # last_date = (cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World')] if country_name == 'World' else cov19.all_date[(cov19.all_date['Country/Region'] == country_name)])['date'].max()
-
-        # ranked_countries = cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World') & (cov19.all_date['date'] == last_date)] if country_name == 'World' else cov19.all_date[(cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['date'] == last_date)]
         ranked_countries = (cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World')] if country_name == 'World' else cov19.all_date[(cov19.all_date['Country/Region'] == country_name)]).copy(deep=True)
 
         _ranked_countries = ranked_countries.groupby(['Country/Region']) if country_name == 'World' else ranked_countries.groupby(['Province/State'])
@@ -58,7 +61,6 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
         }).reset_index()
  
         _ranked_countries = _ranked_countries.sort_values(by=['confirmed'], ascending=False)
-        # df = _ranked_countries[['Continent', 'Country/Region', 'confirmed', 'confirmed_change', 'recovered', 'recovered_change', 'active', 'active_change', 'death', 'death_change', 'growth', 'growth_5day']].copy(deep=True) if country_name == 'World' else _ranked_countries[['Province/State', 'confirmed', 'confirmed_change', 'recovered', 'recovered_change', 'active', 'active_change', 'death', 'death_change', 'growth', 'growth_5day']].copy(deep=True) 
         df = _ranked_countries[['Continent', 'Country/Region', 'confirmed', 'confirmed_change', 'recovered', 'recovered_change', 'active', 'active_change', 'death', 'death_change', 'growth', 'growth_5day']].copy(deep=True) if country_name == 'World' else _ranked_countries[['Province/State', 'confirmed', 'confirmed_change', 'recovered', 'recovered_change', 'active', 'active_change', 'death', 'death_change', 'growth', 'growth_5day']].copy(deep=True) 
         df[['confirmed', 'confirmed_change', 'death', 'death_change', 'growth', 'growth_5day']] = df[['confirmed', 'confirmed_change', 'death', 'death_change', 'growth', 'growth_5day']].apply(pd.to_numeric)
 
@@ -128,7 +130,6 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
 
         df = df[[col for col in df.columns if '/' not in col]] if country_name == 'World' else df[[col for col in df.columns if (country_name + ' /') in col]]
 
-        # ranked_countries = cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World') & (cov19.all_date['date'] == last_date)] if country_name == 'World' else cov19.all_date[~(cov19.all_date['Province/State'] == 'All') & (cov19.all_date['Country/Region'] == country_name) & (cov19.all_date['date'] == last_date)]
         ranked_countries = (cov19.all_date[(cov19.all_date['Province/State'] == 'All') & ~(cov19.all_date['Country/Region'] == 'World')] if country_name == 'World' else cov19.all_date[(cov19.all_date['Country/Region'] == country_name)]).copy(deep=True)
 
         _ranked_countries = ranked_countries.groupby(['Country/Region']) if country_name == 'World' else ranked_countries.groupby(['Province/State'])
@@ -183,7 +184,6 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
             ranked_countries = ranked_countries.sort_values(by=['growth'], ascending=False)
             ranked_countries = ranked_countries[ranked_countries['growth'] > day_count_value]
 
-        # df = df[ranked_countries['Country/Region']]  if country_name == 'World' else df[ranked_countries['Country/Region'] + ' / ' + ranked_countries['Province/State']]
         df = df[ranked_countries['Country/Region']]  if country_name == 'World' else df[ranked_countries['Country/Region'] + ' / ' + ranked_countries['Province/State']]
         
         if not country_name == 'World':
@@ -201,6 +201,7 @@ def getData(country_name, state_name, type_name, cohort_name, day_count_value):
  
         return df  
 
+# Transform the retrieved data to a JSON format for the WebAPI
 def getJson(country_name, state_name, type_name, cohort_name, _day_count_value):
 
     day_count_value = int(_day_count_value)
@@ -208,6 +209,7 @@ def getJson(country_name, state_name, type_name, cohort_name, _day_count_value):
     df = df.applymap(lambda x: str(x) if isinstance(x, datetime.datetime) else str(x))
     return df.T.to_dict().values()
  
+# Get All Timeseries data
 def getAllData():
     cov19.Load(False)
     df = cov19.all_date
@@ -215,6 +217,7 @@ def getAllData():
     df = df[['date', 'Continent', 'Country/Region', 'Province/State', 'confirmed', 'confirmed_change', 'active', 'active_change', 'recovered', 'recovered_change', 'death', 'death_change', 'growth', 'growth_5day']]
     return df.T.to_dict().values() 
 
+# Get All Timeseries reindexed from the nth day of infection
 def getAllDataFromX():
     cov19.Load(False)
     df_0 = cov19.all_from_0
@@ -231,11 +234,9 @@ def getAllDataFromX():
     
     df = df.applymap(lambda x: str(x) if isinstance(x, datetime.datetime) else str(x))
     return df.T.to_dict().values()
- 
-def test():
-    # return getData('Australia', 'All', 'Statistics', 'Table', 1)
-    return getData('World', 'All', 'Statistics', 'Table', 1)
 
+
+# Plotly/Dash code as required by CoFlows
 dash_init = True
 __assetsFolder = '/app/mnt/Files/assets'
 
