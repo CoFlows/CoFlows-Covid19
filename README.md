@@ -19,22 +19,22 @@ The COVID19 project has two ways of visualizing the dataset within this code bas
 :-------------------------:|:-------------------------:
 ![](Files/docs/CoFlows-covid19-dash.png)  | ![](Files/docs/CoFlows-covid19-getAllData.png)
 
-Hosted sample: https://coflows.quant.app/dash/c68ca7c8-c9b6-4ded-b25a-2867f10a150a/covid19.py/
+Hosted sample: https://app.coflows.com/dash/c68ca7c8-c9b6-4ded-b25a-2867f10a150a/covid19.py/
 
 
 ## WebAPI
 There are three WebAPI entry points in this project:
 * Custom table showing the data presented in the Plotly/Dash visual. This table is controlled by the Plotly/Dash selections. When you change the selections, the visuals change and the parameters of the url change accordingly to download the 'active' data in a JSON format. 
 
-https://coflows.quant.app/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getJson&p[0]=World&p[1]=All&p[2]=Statistics&p[3]=Confirmed&p[4]=1
+https://app.coflows.com/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getJson&p[0]=World&p[1]=All&p[2]=Statistics&p[3]=Confirmed&p[4]=1
 
 * All the Timeseries for all countries and states. 
 
-https://coflows.quant.app/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getAllData
+https://app.coflows.com/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getAllData
 
 * All the Timeseries for all countries and states reindexed from the nth day of infection.  
 
-https://coflows.quant.app/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getAllDataFromX
+https://app.coflows.com/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getAllDataFromX
 
 If you choose to run this locally please change the hostname in the URLs above to http://localhost/....
 ## Pipeline
