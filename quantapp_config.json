@@ -14,7 +14,7 @@
         }
     },
     "Cloud":{
-        "Host": "coflows.quant.app",
+        "Host": "app.coflows.com",
         "SecretKey": "xxx",
         "SSL": true
     }
