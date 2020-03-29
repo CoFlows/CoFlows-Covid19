@@ -69,7 +69,9 @@ def Load(force):
         _df = pd.DataFrame(res, columns=['Name', 'confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious'])
         latest_pd = latest_pd.append(_df)
     latest_pd['Name'] = latest_pd.apply(lambda row: 'Australian Capital Territory' if row['Name'] == 'CanberraACT)' else row['Name'] , axis=1)
-    latest_pd[['confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious']] = latest_pd[['confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious']].apply(pd.to_numeric).fillna(0)
+    print(latest_pd[['confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious']])
+    # latest_pd[['confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious']] = latest_pd[['confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious']].apply(pd.to_numeric).fillna(0)
+    latest_pd[['confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered']] = latest_pd[['confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered']].fillna(0).apply(pd.to_numeric).fillna(0)
     
     print(latest_pd)
 
