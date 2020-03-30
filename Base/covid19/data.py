@@ -73,8 +73,6 @@ def Load(force):
     # latest_pd[['confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious']] = latest_pd[['confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious']].apply(pd.to_numeric).fillna(0)
     latest_pd[['confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered']] = latest_pd[['confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered']].fillna(0).apply(pd.to_numeric).fillna(0)
     
-    print(latest_pd)
-
     # Load data from ULKLC for faster country data.
     print('COVID19 Load data from ULKLC...')
     ulklc_url = 'https://raw.githubusercontent.com/ulklc/covid19-timeseries/master/countryReport/raw/rawReport.csv'
