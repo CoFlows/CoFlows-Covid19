@@ -685,11 +685,11 @@ def run(port, path):
             def set_links(country_name, state_name, type_name, cohort_name1, day_count_value1, cohort_name2, day_count_value2):
 
                 link = [
-                    html.A('Download JSON Dataset in table below', href='http://coflows.quant.app/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getJson&p[0]=' + country_name + '&p[1]=' + state_name + '&p[2]=' + type_name + '&p[3]=' + cohort_name1 + '&p[4]=' + str(day_count_value1), target="_blank") if type_name == 'Day count' else html.A('Download JSON Dataset in table below', href='http://coflows.quant.app/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getJson&p[0]=' + country_name + '&p[1]=' + state_name + '&p[2]=' + type_name + '&p[3]=' + cohort_name2 + '&p[4]=' + str(day_count_value2 if isinstance(day_count_value2, int) else 1), target="_blank"),
+                    html.A('Download JSON Dataset in table below', href='https://app.coflows.com/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getJson&p[0]=' + country_name + '&p[1]=' + state_name + '&p[2]=' + type_name + '&p[3]=' + cohort_name1 + '&p[4]=' + str(day_count_value1), target="_blank") if type_name == 'Day count' else html.A('Download JSON Dataset in table below', href='https://app.coflows.com/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getJson&p[0]=' + country_name + '&p[1]=' + state_name + '&p[2]=' + type_name + '&p[3]=' + cohort_name2 + '&p[4]=' + str(day_count_value2 if isinstance(day_count_value2, int) else 1), target="_blank"),
                     html.Br(),
-                    html.A('Download JSON All Timeseries', href='http://coflows.quant.app/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getAllData', target="_blank"),
+                    html.A('Download JSON All Timeseries', href='https://app.coflows.com/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getAllData', target="_blank"),
                     html.Br(),
-                    html.A('Download JSON All Timeseries From X', href='http://coflows.quant.app/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getAllDataFromX', target="_blank")
+                    html.A('Download JSON All Timeseries From X', href='https://app.coflows.com/m/getwb?workbook=c68ca7c8-c9b6-4ded-b25a-2867f10a150a&id=covid19.py&name=getAllDataFromX', target="_blank")
                 ]
                 return link
 
