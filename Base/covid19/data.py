@@ -53,7 +53,7 @@ def Load(force):
     print('COVID19 Load data from ncov2019.live')
     covid_live_url = 'https://ncov2019.live/data'
     html_soup = BeautifulSoup(get(covid_live_url).text, 'html.parser')
-    live_tables = ['sortable_table_Global', 'sortable_table_China', 'sortable_table_Canada', 'sortable_table_Australia']
+    live_tables = ['sortable_table_global', 'sortable_table_china', 'sortable_table_canada', 'sortable_table_australia']
     latest_pd = pd.DataFrame(columns=['Name', 'confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious'])
 
     for table_name in live_tables:
