@@ -56,7 +56,7 @@ To be clear, the **Master Table** is
 
 The code is built in Python and executed using [**CoFlows CE (Community Edition)**](https://github.com/QuantApp/CoFlows-CE) which is a polyglot runtime that simplifies the development, hosting and deployment of powerful data-centric workflows. **CoFlows** enables developers to create rich **Web-APIs** with almost **zero boiler plate** and scheduled / reactive processes through a range of languages including CoreCLR (C#, F# and VB), JVM (Java and Scala), Python and Javascript. Furthermore, functions written in any of these languages can call each other within the same process with **full interop**.
 
-The logic in Workspaces is assigned to three different types.
+The logic in Workflows is assigned to three different types.
 * [Base/data.py](Base/covid19/data.py) contains the pull, scrape and processing code.
 * [Agent/scraper.py](Agent/scraper.py) is the scheduled agent that once per hour updates the dataset.
 * [Queries/covid19.py](Queries/covid19.py) is the Plotly/Dash interface and delivery functions for the WebAPI. Every function defined in a query is automatically assigned a _url_ by the **CoFlows** simplifying the process of creating these endpoints.

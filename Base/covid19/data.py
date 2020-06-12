@@ -53,7 +53,7 @@ def Load(force):
     print('COVID19 Load data from ncov2019.live')
     covid_live_url = 'https://ncov2019.live/data'
     html_soup = BeautifulSoup(get(covid_live_url).text, 'html.parser')
-    live_tables = ['sortable_table_global', 'sortable_table_china', 'sortable_table_canada', 'sortable_table_australia']
+    live_tables = ['sortable_table_world', 'sortable_table_canada', 'sortable_table_australia']
     latest_pd = pd.DataFrame(columns=['Name', 'confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious'])
 
     for table_name in live_tables:
@@ -66,10 +66,13 @@ def Load(force):
             row = [re.sub('[^A-Za-z0-9]\W+', '', d.text.strip()).replace(',', '') for d in td]
             if row:
                 res.append(row)
-        _df = pd.DataFrame(res, columns=['Name', 'confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious'])
+        _df = pd.DataFrame(res, columns=['Name', 'confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'critical', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious'])
         latest_pd = latest_pd.append(_df)
     latest_pd['Name'] = latest_pd.apply(lambda row: 'Australian Capital Territory' if row['Name'] == 'CanberraACT)' else row['Name'] , axis=1)
+    latest_pd[['confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious']] = latest_pd[['confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious']].replace(r"[a-zA-Z]",'', regex=True)
+    print('---------')
     print(latest_pd[['confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious']])
+    print('---------')
     # latest_pd[['confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious']] = latest_pd[['confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered', 'serious']].apply(pd.to_numeric).fillna(0)
     latest_pd[['confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered']] = latest_pd[['confirmed', 'confirmed_chg', 'confirmed_chg_pct', 'death', 'death_chg', 'death_chg_pct', 'recovered']].fillna(0).apply(pd.to_numeric).fillna(0)
     

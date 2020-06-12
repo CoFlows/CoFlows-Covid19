@@ -48,7 +48,7 @@ def Job(timestamp, data):
 def pkg():
     return qae.FPKG(
     defaultID, #ID
-    "c68ca7c8-c9b6-4ded-b25a-2867f10a150a", #Workspace ID
+    "c68ca7c8-c9b6-4ded-b25a-2867f10a150a", #Workflow ID
     "COVID19 Scraper Agent", #Name
     "COVID19 Scraper Agent", #Description
     None, #M ID Listener

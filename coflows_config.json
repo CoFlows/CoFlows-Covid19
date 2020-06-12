@@ -3,7 +3,7 @@
         "Connection": "mnt/database.db" ,
         "Type": "sqlite"
     },
-    "Workspace": "mnt/package.json",
+    "Workflow": "mnt/package.json",
     "Jupyter": false,
     "Server":{
         "Host": "localhost",
@@ -15,7 +15,7 @@
     },
     "Cloud":{
         "Host": "app.coflows.com",
-        "SecretKey": "xxx",
+        "SecretKey": "4319b372201c7aca93f4c7ae358cefbc",
         "SSL": true
     }
 }

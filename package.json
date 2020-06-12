@@ -63,6 +63,10 @@
   "Bins": [],
   "Files": [
     {
+      "Name": ".DS_Store",
+      "Content": "Files/.DS_Store"
+    },
+    {
       "Name": "my.azureauth",
       "Content": "Files/my.azureauth"
     },
@@ -108,6 +112,8 @@
     "Limit": {
       "Cpu": "",
       "Mem": ""
-    }
+    },
+    "VolumeMounts": null,
+    "Storage": null
   }
 }
